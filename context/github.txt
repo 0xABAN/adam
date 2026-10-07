@@ -1,0 +1,49 @@
+# GitHub snapshot — https://github.com/0xABAN
+# as of 2026-03-29 (public API + profile README)
+
+handle: 0xABAN
+name: Adam T
+profile: https://github.com/0xABAN
+public_repos: 13
+followers: 5
+
+## profile blurb
+ds+stat student at penn state ('27), software engineer, and 3x hackathon winner.
+I build whatever I find interesting. past companies include amazon & ibm.
+
+skills icons on profile: python, ts, js, java, cs, cpp, pytorch, fastapi, flask, nodejs, postgres, mongodb, aws, azure, git
+
+## stuff i made (from profile README)
+- maestro — AI canvas that draws with you. ByteDance 2nd place (solo). https://github.com/0xABAN/maestro
+- simulacra — Learn not just from the past, but also from the future. YHacks 1st place. https://github.com/0xABAN/simulacra
+- copycat — Design-reference MCP for coding agents. https://github.com/0xABAN/copycat
+- fit-check — 360° outfit video to TRIBEv2 fit prediction. https://github.com/0xABAN/fit-check
+- agent-dj — Spotify now-playing in the Claude Code / OpenCode statusline. https://github.com/0xABAN/agent-dj
+- DefinitiveMultiplayer — Multiplayer QoL for Terraria on tModLoader. https://github.com/0xABAN/DefinitiveMultiplayer
+
+## pinned (profile)
+- simulacra — K2 Think V2 1st Place Winner at YHacks (TypeScript)
+- maestro — ByteDance 2nd Place Winner solo (TypeScript)
+- terrar.ai — xAI 1st Place Winner at HackPrinceton (C#) — https://github.com/SlothfulDreams/terrar.ai (org/collab pin)
+
+## public repos (API)
+name | description | lang | stars | fork | url
+-----|-------------|------|-------|------|----
+maestro | ByteDance 2nd Place Winner (solo hacker)!! | TypeScript | 2 | no | https://github.com/0xABAN/maestro
+copycat | (no API description) | Python | 3 | no | https://github.com/0xABAN/copycat
+simulacra | K2 Think V2 1st Place Winner at YHacks | TypeScript | 1 | no | https://github.com/0xABAN/simulacra
+DefinitiveMultiplayer | | C# | 0 | no | https://github.com/0xABAN/DefinitiveMultiplayer
+agent-dj | | Python | 0 | no | https://github.com/0xABAN/agent-dj
+GotD | | Python | 0 | no | https://github.com/0xABAN/GotD
+flash-gym | | Python | 0 | no | https://github.com/0xABAN/flash-gym
+claude-dj | | Python | 0 | no | https://github.com/0xABAN/claude-dj
+google-io | | TypeScript | 0 | no | https://github.com/0xABAN/google-io
+ForMula | | Python | 0 | no | https://github.com/0xABAN/ForMula
+fit-check | | TypeScript | 0 | no | https://github.com/0xABAN/fit-check
+llmwiki | Open Source Implementation of Karpathy's LLM Wiki... | TypeScript | 0 | yes (fork) | https://github.com/0xABAN/llmwiki
+0xABAN | profile README repo | | 0 | yes (fork) | https://github.com/0xABAN/0xABAN
+
+## notes
+- resume project "nexdraw" ≈ github maestro (NexHacks ByteDance solo 2nd)
+- resume "formula" ≈ github ForMula
+- terrar.ai may live under SlothfulDreams on GitHub while pinned from 0xABAN
