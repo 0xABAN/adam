@@ -13,13 +13,12 @@ replies are not removed here: that check runs after messages are merged.
 import json
 import re
 from collections import Counter
-from datetime import datetime
 from pathlib import Path
 
 DATA = Path(__file__).resolve().parents[1] / "data"
 SOURCE = DATA / "discord" / "Messages"
 OUT = DATA / "clean"
-CUTOFF = datetime(2022, 1, 1)
+CUTOFF = "2022-01-01"  # ISO timestamps sort correctly as strings
 
 URL = re.compile(r"https?://\S+")
 
@@ -27,7 +26,7 @@ URL = re.compile(r"https?://\S+")
 BOT = re.compile(r"^[$.?&!;%,>][A-Za-z]")  # $wa, .c, ?solved, &daily; not $1750 or "^ weird"
 API_KEY = re.compile(r"\b(sk-[\w-]{20,}|xai-\w{20,}|ghp_\w{20,}|AKIA[0-9A-Z]{16})|\b[A-Z_]*(API_KEY|TOKEN|SECRET)[A-Z_]*\s*=")
 BOX_DRAWING = re.compile(r"[│┌┐└┘├┤─]")  # not ╯, which kaomoji use: (╯°□°)╯︵ ┻━┻
-HEADING = re.compile(r"^#{1,3} ", re.M)
+HEADING = re.compile(r"^#{1,3} ", re.MULTILINE)
 CODE_LINE = re.compile(
     r"^\s{2,}\S"  # indented
     r"|[;{}]\s*$"  # statement or block end
@@ -36,14 +35,14 @@ CODE_LINE = re.compile(
     r"|^\s*(def|class|import|from|return|print|const|let|function|public)\b"
     r"|<-"  # R assignment
 )
-DATA_DUMP = re.compile(r"^\s*[\[{].{28,}[\]}]\s*$", re.S)  # [[0, 1], ...] or {'key': ...}
+DATA_DUMP = re.compile(r"^\s*[\[{].{28,}[\]}]\s*$", re.DOTALL)  # [[0, 1], ...] or {'key': ...}
 COMMAND = re.compile(r"^\s*(PS [A-Z]:\\|curl -|cmake -)")
 CALL_SHAPE = re.compile(r"^[\w.]*[(\[].*[)\]][\w.,:;]*$")  # O(n^2), matrix[0][1]
 
 # Pieces stripped out of a message that is otherwise kept.
 STRIP = [
-    re.compile(r"```.*?```", re.S),  # code blocks
-    re.compile(r"^> .*$", re.M),  # quotes of someone else's message
+    re.compile(r"```.*?```", re.DOTALL),  # code blocks
+    re.compile(r"^> .*$", re.MULTILINE),  # quotes of someone else's message
     URL,
     re.compile(r"<[@#][!&]?\d+>|@everyone|@here"),  # mentions
     re.compile(r"<a?:\w+:\d+>"),  # custom emoji
@@ -110,8 +109,8 @@ def looks_formal(text: str) -> bool:
     if len(text) < 200 or len(sentences) < 3:
         return False
 
-    capitalized = sum(s.lstrip("\"“*-( ")[:1].isupper() for s in sentences) / len(sentences)
-    punctuated = sum(s.rstrip("\"”*) ")[-1:] in ".!?:" for s in sentences) / len(sentences)
+    capitalized = sum(s.lstrip('"“*-( ')[:1].isupper() for s in sentences) / len(sentences)
+    punctuated = sum(s.rstrip('"”*) ')[-1:] in ".!?:" for s in sentences) / len(sentences)
     return capitalized >= 0.75 and punctuated >= 0.5
 
 
@@ -166,8 +165,7 @@ def main() -> None:
             records.reverse()  # the export lists newest first
 
             for record in records:
-                time = datetime.fromisoformat(record["Timestamp"])
-                if time < CUTOFF:
+                if record["Timestamp"] < CUTOFF:
                     continue
 
                 raw = record["Contents"]
@@ -176,7 +174,10 @@ def main() -> None:
 
                 if reason:
                     reasons[reason] += 1
-                    dropped.write(json.dumps({"channel": folder.name, "time": record["Timestamp"], "reason": reason, "text": raw}, ensure_ascii=False) + "\n")
+                    dropped.write(
+                        json.dumps({"channel": folder.name, "time": record["Timestamp"], "reason": reason, "text": raw}, ensure_ascii=False)
+                        + "\n"
+                    )
                     text = ""
                 elif text:
                     kept += 1
