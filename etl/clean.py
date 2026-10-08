@@ -1,24 +1,29 @@
 """Clean the Discord export into one chronological JSONL of Adam's messages.
 
 Reads  data/discord/Messages/c<id>/{channel.json,messages.json}
-Writes data/clean/messages.jsonl  one row per message from 2022 on:
+Writes data/clean/messages.jsonl  one row per burst of messages from 2022 on:
            {"channel", "type", "time", "text"}, grouped by channel, oldest first
        data/clean/dropped.jsonl   every removed message and the rule that removed it
 
-A removed message keeps its row with text "" (like an image-only message), so the
-gaps between the remaining messages stay exactly as Adam sent them. One-word
-replies are not removed here: that check runs after messages are merged.
+Adam often splits one thought across several messages, so messages sent within
+MERGE_GAP of the previous one are merged into a single row.
+
+A removed message stays in the merge with text "" (like an image-only message), so
+the gaps between the remaining messages stay exactly as Adam sent them. One-word
+replies are not removed here: that check runs on the merged messages.
 """
 
 import json
 import re
-from collections import Counter
+from collections import Counter, defaultdict
+from datetime import datetime, timedelta
 from pathlib import Path
 
 DATA = Path(__file__).resolve().parents[1] / "data"
 SOURCE = DATA / "discord" / "Messages"
 OUT = DATA / "clean"
 CUTOFF = "2022-01-01"  # ISO timestamps sort correctly as strings
+MERGE_GAP = timedelta(seconds=60)  # picked in experiments/gaps.py
 
 URL = re.compile(r"https?://\S+")
 
@@ -149,13 +154,36 @@ def drop_reason(raw: str, text: str, copies: Counter) -> str | None:
     return None
 
 
+def merge(obj: dict, threshold: timedelta) -> dict:
+    """Merge each channel's bursts of (time, text) messages into one message.
+
+    A message sent within `threshold` of the previous one joins it, so a burst keeps
+    growing until a gap exceeds the threshold. The merged message takes the time of
+    its last message, since the next gap is measured from there.
+    """
+    res = defaultdict(list)
+    for channel, record in obj.items():
+        stack = []
+        for time, msg in record:
+            if stack and time - stack[-1][0] <= threshold:
+                _, prev_msg = stack.pop()
+                stack.append((time, (prev_msg + " " + msg).strip()))  # empty messages add no spaces
+            else:
+                stack.append((time, msg))
+
+        res[channel] = stack
+
+    return res
+
+
 def main() -> None:
     OUT.mkdir(exist_ok=True)
     copies = Counter()
     reasons = Counter()
     kept = 0
+    channels = defaultdict(list)  # (channel, type) -> [(time, text)], oldest first
 
-    with open(OUT / "messages.jsonl", "w") as clean, open(OUT / "dropped.jsonl", "w") as dropped:
+    with open(OUT / "dropped.jsonl", "w") as dropped:
         for folder in sorted(SOURCE.iterdir()):
             if not (folder / "channel.json").exists():
                 continue
@@ -182,10 +210,18 @@ def main() -> None:
                 elif text:
                     kept += 1
 
-                row = {"channel": folder.name, "type": kind, "time": record["Timestamp"], "text": text}
+                channels[(folder.name, kind)].append((datetime.fromisoformat(record["Timestamp"]), text))
+
+    merged = 0
+    with open(OUT / "messages.jsonl", "w") as clean:
+        for (channel, kind), messages in merge(channels, MERGE_GAP).items():
+            for time, text in messages:
+                row = {"channel": channel, "type": kind, "time": str(time), "text": text}
                 clean.write(json.dumps(row, ensure_ascii=False) + "\n")
+                merged += bool(text)
 
     print(f"kept {kept} messages with text; dropped {sum(reasons.values())}: {dict(reasons.most_common())}")
+    print(f"merged into {merged} messages with text")
 
 
 if __name__ == "__main__":
