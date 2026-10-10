@@ -1,7 +1,0 @@
-# Training runs on a CUDA GPU, separate from the ETL environment in pyproject.toml.
-# transformers and trl match Unsloth's official Qwen3 notebooks, and unsloth_zoo is the
-# version whose response masking was checked against this dataset.
-unsloth==2026.10.3
-unsloth_zoo==2026.10.3
-transformers==4.57.6
-trl==0.22.2

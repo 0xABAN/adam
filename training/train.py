@@ -4,11 +4,11 @@ Reads  data/sft/{train,holdout}.jsonl   written by etl/build_sft.py
 Writes data/lora/<run>/adapter/          the LoRA adapter and tokenizer, where <run> is
                                          "smoke" or "full"
 
-Needs a CUDA GPU, so it runs on Runpod rather than a Mac:
+Needs a CUDA GPU, so it runs on Runpod rather than a Mac. training/ is its own uv
+project, locked for Linux, so from inside it:
 
-    pip install -r training/requirements.txt
-    python training/train.py --smoke   # 50 steps, to check the setup before a full run
-    python training/train.py           # one epoch over the training split
+    uv run train.py --smoke   # 50 steps, to check the setup before a full run
+    uv run train.py           # one epoch over the training split
 
 Both runs check that training scores only Adam's replies, report loss on a sample of the
 holdout, and print replies to a few holdout messages.
