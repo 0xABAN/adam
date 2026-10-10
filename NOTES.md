@@ -10,7 +10,6 @@
 ## Training 
 
 - leverage Runpod GPUs ($100 in credits). More specifications on model size & cost are needed 
-- 
 
 ## Hosting 
 
