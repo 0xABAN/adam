@@ -76,12 +76,13 @@ async def backtranslate(i: int, row: dict) -> None:
     async with concurrency:
         message = await client.messages.create(
             model="claude-haiku-5-5",
-            max_tokens=2_000,
+            max_tokens=8_000,  # xhigh effort thinks for ~1k tokens per row; leave room so replies aren't cut off
             # Every request shares this prompt, so cache it: after the first request it's billed
             # at a fraction of the normal input price.
             system=[{"type": "text", "text": PROMPT, "cache_control": {"type": "ephemeral"}}],
             messages=[{"role": "user", "content": row["text"]}],
-            output_config={"format": {"type": "json_schema", "schema": SCHEMA}},
+            # xhigh effort makes Haiku think before every reply, which measurably improved the pairs
+            output_config={"effort": "xhigh", "format": {"type": "json_schema", "schema": SCHEMA}},
         )
 
     # A refused or cut-off reply holds partial JSON, so only parse finished ones. This is why we
@@ -90,8 +91,7 @@ async def backtranslate(i: int, row: dict) -> None:
         append(FAILED, {"row": i, "text": row["text"], "reason": message.stop_reason})
         return
 
-    # Haiku decides per request whether to think before answering, so the reply can open with a
-    # thinking block. The JSON is always the last block.
+    # The reply opens with a thinking block, so the JSON is the last block.
     block = message.content[-1]
     assert block.type == "text"
 
