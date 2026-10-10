@@ -26,13 +26,13 @@ from pydantic import BaseModel
 
 load_dotenv()
 
-DATA = Path(__file__).resolve().parents[1] / "data"
+DATA = Path(__file__).resolve().parents[2] / "data"
 SOURCE = DATA / "clean" / "messages.jsonl"
 OUT = DATA / "backtranslated"
 PAIRS = OUT / "pairs.jsonl"
 FAILED = OUT / "failed.jsonl"
 
-PROMPT = (Path(__file__).parent / "backtranslate_prompt.md").read_text()
+PROMPT = (Path(__file__).parent / "prompt.md").read_text()
 
 client = AsyncAnthropic(
     default_headers={"anthropic-workspace-id": os.environ["ANTHROPIC_WORKSPACE_ID"]},
