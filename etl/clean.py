@@ -23,7 +23,7 @@ DATA = Path(__file__).resolve().parents[1] / "data"
 SOURCE = DATA / "discord" / "Messages"
 OUT = DATA / "clean"
 CUTOFF = "2022-01-01"  # ISO timestamps sort correctly as strings
-MERGE_GAP = timedelta(seconds=60)  # picked in experiments/gaps.py
+MERGE_GAP = timedelta(seconds=60)  # chosen from a histogram of gaps between consecutive messages
 
 URL = re.compile(r"https?://\S+")
 
