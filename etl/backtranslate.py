@@ -4,7 +4,10 @@ Reads  data/clean/messages.jsonl          one row per burst of Adam's messages
 Writes data/backtranslated/pairs.jsonl    {"row", "channel", "type", "time", "text", "prompt"}, where
                                           "prompt" is the friend message Claude wrote for Adam's
                                           real "text" to reply to
-       data/backtranslated/failed.jsonl   {"row", "text", "stop_reason"} for rows Claude refused or cut off
+       data/backtranslated/failed.jsonl   {"row", "text", "reason"} for rows left without a pair: the
+                                          stop reason when Claude refused or was cut off, or
+                                          "no plausible prompt" when no single friend message
+                                          could set up Adam's
 
 "row" is the row's line number in messages.jsonl. Rows already in either output are skipped,
 so rerunning after an interruption continues where it stopped. Rerunning clean.py renumbers
@@ -39,7 +42,7 @@ concurrency = asyncio.Semaphore(20)
 
 
 class Context(BaseModel):
-    prompt: str  # the friend message that Adam's text replies to
+    prompt: str | None  # the friend message that Adam's text replies to, or None if none could set it up
 
 
 SCHEMA = transform_schema(Context)
@@ -84,7 +87,7 @@ async def backtranslate(i: int, row: dict) -> None:
     # A refused or cut-off reply holds partial JSON, so only parse finished ones. This is why we
     # don't use messages.parse(): it raises on partial JSON, which would stop the whole run.
     if message.stop_reason != "end_turn":
-        append(FAILED, {"row": i, "text": row["text"], "stop_reason": message.stop_reason})
+        append(FAILED, {"row": i, "text": row["text"], "reason": message.stop_reason})
         return
 
     # Haiku decides per request whether to think before answering, so the reply can open with a
@@ -93,6 +96,12 @@ async def backtranslate(i: int, row: dict) -> None:
     assert block.type == "text"
 
     context = Context.model_validate_json(block.text)
+
+    # Claude rejects rows that only make sense mid-conversation: a forced setup would teach nonsense.
+    if context.prompt is None:
+        append(FAILED, {"row": i, "text": row["text"], "reason": "no plausible prompt"})
+        return
+
     append(PAIRS, {"row": i, **row, "prompt": context.prompt})
 
 
