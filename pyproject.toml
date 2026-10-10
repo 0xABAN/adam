@@ -8,3 +8,11 @@ dependencies = [
   "anthropic>=1.12.1",
   "python-dotenv>=1.2.4",
 ]
+
+[dependency-groups]
+train = [
+    "datasets>=4.8.5",
+    "trl>=1.13.0",
+    "unsloth==2026.10.3",
+    "unsloth-zoo==2026.10.3",
+]
