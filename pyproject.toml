@@ -10,6 +10,9 @@ dependencies = [
 ]
 
 [dependency-groups]
+serve = [
+    "modal>=1.6.1",
+]
 train = [
     "datasets>=4.8.5",
     "trl>=1.13.0",
