@@ -100,9 +100,9 @@ vllm_image = (
     # vllm_cache holds the compiled CUDA graphs. Compiling takes about 100 s, and only
     # happens on the first start after a vLLM or configuration change.
     volumes={"/models": models, "/root/.cache/vllm": vllm_cache},
-    # Cost limits: never more than one GPU, shut down 5 minutes after the last request.
+    # Cost limits: never more than one GPU, shut down 15 minutes after the last request.
     max_containers=1,
-    scaledown_window=5 * MINUTES,
+    scaledown_window=15 * MINUTES,
     timeout=10 * MINUTES,
 )
 @modal.concurrent(max_inputs=32)  # vLLM batches concurrent requests on the one GPU
