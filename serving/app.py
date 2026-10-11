@@ -125,8 +125,8 @@ def serve():
         # replies. Requests can still set their own.
         "--override-generation-config",
         json.dumps({"temperature": 0.7, "top_p": 0.8, "top_k": 20}),
-        # Room for the portfolio's system prompt about Adam (about 2,500 tokens) plus a
-        # conversation; the L4's KV cache still holds four full-length requests at once.
+        # Room for a long conversation; the L4's KV cache still holds four full-length
+        # requests at once.
         "--max-model-len",
         "8192",
         "--max-num-seqs",
